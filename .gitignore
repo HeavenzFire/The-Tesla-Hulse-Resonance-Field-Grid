@@ -1,45 +1,31 @@
-The provided file path `"Texas-Hemp-Expos\\303\\251"` appears to be a regular file or directory path with special characters, but it doesn't match any common patterns for compiled files, dependencies, temporary files, or other typical gitignore entries. Since this doesn't represent a standard artifact type that should be ignored, no entry needs to be added to .gitignore.
-
-(empty)
-(empty)
 ```
-# Compiled Python files
-*.pyc
+# Python
 __pycache__/
-
-# Dependencies
-.venv/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
 venv/
-node_modules/
+.venv/
+.ENV
+.ENV.local
 
-# Logs and temporary files
+# Logs
 *.log
-*.tmp
 
-# Editors
-.vscode/
-.idea/
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# Environment files
+# Environment specific files
 .env
 .env.local
 *.env.*
-
-# Coverage reports
-.coverage
-coverage/
-htmlcov/
-
-# Python cache
-.mypy_cache/
-.pytest_cache/
-
-# Build directories
-dist/
-build/
-target/
-
-# System files
-.DS_Store
-Thumbs.db
+.env.*
 ```
