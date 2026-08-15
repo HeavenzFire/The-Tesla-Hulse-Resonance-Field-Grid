@@ -23,7 +23,7 @@ export const parseText = (text: string) => {
 
 const Section: React.FC<SectionProps> = ({ number, title, subtitle, paragraphs }) => {
   return (
-    <section className="mb-12">
+    <section className="mb-12" data-testid="section-component">
       <div className="flex items-start gap-4">
         {number && (
           <div className="text-5xl font-bold text-gray-700/80 font-serif -mt-2">

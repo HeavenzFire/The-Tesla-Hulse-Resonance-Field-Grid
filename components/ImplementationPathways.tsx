@@ -21,7 +21,7 @@ const parseText = (text: string) => {
 
 const ImplementationPathways: React.FC<ImplementationPathwaysProps> = ({ title, pathways }) => {
   return (
-    <section className="my-16">
+    <section className="my-16" data-testid="section-component">
       <div className="flex items-start gap-4">
         <div className="text-5xl font-bold text-gray-700/80 font-serif -mt-2">
           9.
