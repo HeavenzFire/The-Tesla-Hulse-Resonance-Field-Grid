@@ -21,7 +21,7 @@ const parseText = (line: string) => {
 
 const VisionStatement: React.FC<VisionStatementProps> = ({ title, text }) => {
   return (
-    <section className="mt-20 pt-10 border-t-2 border-cyan-500/20 text-center">
+    <section className="mt-20 pt-10 border-t-2 border-cyan-500/20 text-center" data-testid="section-component">
        <div className="flex items-start gap-4 text-left">
         <div className="text-5xl font-bold text-gray-700/80 font-serif -mt-2">
           10.
