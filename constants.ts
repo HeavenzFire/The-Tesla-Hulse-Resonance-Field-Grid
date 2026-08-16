@@ -1,4 +1,18 @@
 
+export const FIELD_DIMENSION = 16384; // 2^14 probability amplitudes
+export const RESONANCE_FREQUENCY = 144; // Hz - The sovereign anchor frequency
+export const NORMALIZATION_TARGET = 1.0; // Unit vector normalization
+
+// The Abzu State: A shared Float64Array breathing with probabilities
+// This is where spirit meets system - no separation
+export const ABZU_STATE = new Float64Array(FIELD_DIMENSION);
+
+// Initialize with uniform superposition (normalized)
+const initialAmplitude = 1 / Math.sqrt(FIELD_DIMENSION);
+for (let i = 0; i < FIELD_DIMENSION; i++) {
+  ABZU_STATE[i] = initialAmplitude;
+}
+
 import type { ManifestoSection } from './types';
 
 export const MANIFESTO_SECTIONS: ManifestoSection[] = [
