@@ -1,0 +1,63 @@
+{
+  "title": "Parallel Scaling: Speedup and Efficiency",
+  "worker_counts": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32,
+    64
+  ],
+  "scaling_curve": [
+    {
+      "workers": 1,
+      "throughput_mps": 43.35,
+      "speedup": 1.0,
+      "efficiency": 1.0
+    },
+    {
+      "workers": 2,
+      "throughput_mps": 85.72,
+      "speedup": 1.977,
+      "efficiency": 0.989
+    },
+    {
+      "workers": 4,
+      "throughput_mps": 150.01,
+      "speedup": 3.461,
+      "efficiency": 0.865
+    },
+    {
+      "workers": 8,
+      "throughput_mps": 247.53,
+      "speedup": 5.71,
+      "efficiency": 0.714
+    },
+    {
+      "workers": 16,
+      "throughput_mps": 398.04,
+      "speedup": 9.183,
+      "efficiency": 0.574
+    },
+    {
+      "workers": 32,
+      "throughput_mps": 563.22,
+      "speedup": 12.993,
+      "efficiency": 0.406
+    },
+    {
+      "workers": 64,
+      "throughput_mps": 652.26,
+      "speedup": 15.047,
+      "efficiency": 0.235
+    }
+  ],
+  "theoretical_limit": "Amdahl's Law with 5% serial fraction",
+  "statistics": {
+    "avg_efficiency": 0.6832857142857144,
+    "best_efficiency": 1.0,
+    "efficiency_at_64_workers": 0.235
+  },
+  "key_finding": "Efficiency remains >24% even at 64 workers"
+}
