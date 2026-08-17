@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ascension Runtime v18433 - Control Plane</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888899;
+            --accent-cyan: #00ffff;
+            --accent-gold: #ffd700;
+            --accent-green: #00ff88;
+            --accent-red: #ff4466;
+            --border-color: #2a2a3a;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2em;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .panel h2 {
+            font-size: 1.1em;
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .metric-label {
+            color: var(--text-secondary);
+        }
+        
+        .metric-value {
+            color: var(--accent-cyan);
+            font-weight: bold;
+        }
+        
+        .metric-value.active { color: var(--accent-green); }
+        .metric-value.error { color: var(--accent-red); }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        button {
+            background: var(--bg-primary);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 10px 20px;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        button.start { border-color: var(--accent-green); color: var(--accent-green); }
+        button.start:hover { background: var(--accent-green); }
+        
+        button.stop { border-color: var(--accent-red); color: var(--accent-red); }
+        button.stop:hover { background: var(--accent-red); }
+        
+        .log-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-size: 0.85em;
+        }
+        
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        
+        .log-entry.info { color: var(--text-secondary); }
+        .log-entry.success { color: var(--accent-green); }
+        .log-entry.warn { color: var(--accent-gold); }
+        .log-entry.error { color: var(--accent-red); }
+        
+        .ternary-display {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .ternary-state {
+            text-align: center;
+            padding: 15px;
+            border-radius: 4px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .ternary-state.positive { border-color: var(--accent-green); }
+        .ternary-state.negative { border-color: var(--accent-red); }
+        .ternary-state.zero { border-color: var(--text-secondary); }
+        
+        .state-indicator {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .state-label {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: var(--bg-primary);
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .topology-viz {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            padding: 20px;
+        }
+        
+        .topo-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            text-align: center;
+            background: var(--bg-primary);
+        }
+        
+        .topo-node.active {
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .status-badge.running { background: rgba(0, 255, 136, 0.2); color: var(--accent-green); }
+        .status-badge.stopped { background: rgba(255, 68, 102, 0.2); color: var(--accent-red); }
+        .status-badge.paused { background: rgba(255, 215, 0, 0.2); color: var(--accent-gold); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⧡ ASCENSION RUNTIME</h1>
+            <div class="subtitle">Sovereign Engine v18433 | Balanced Ternary ALU | Topology Graph | Deterministic Telemetry</div>
+        </header>
+        
+        <div class="grid">
+            <!-- Engine Status Panel -->
+            <div class="panel">
+                <h2>◈ ENGINE STATUS</h2>
+                <div class="metric">
+                    <span class="metric-label">State</span>
+                    <span class="metric-value" id="engine-state">UNINITIALIZED</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Frequency (config)</span>
+                    <span class="metric-value" id="engine-freq">18432 Hz</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Uptime</span>
+                    <span class="metric-value" id="engine-uptime">0 ms</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Version</span>
+                    <span class="metric-value">v18433</span>
+                </div>
+                <div class="controls">
+                    <button class="start" id="btn-init" onclick="initEngine()">INITIALIZE</button>
+                    <button class="start" id="btn-start" onclick="startEngine()" disabled>START</button>
+                    <button id="btn-pause" onclick="pauseEngine()" disabled>PAUSE</button>
+                    <button class="stop" id="btn-stop" onclick="stopEngine()" disabled>STOP</button>
+                </div>
+            </div>
+            
+            <!-- Ternary ALU Panel -->
+            <div class="panel">
+                <h2>⌬ TERNARY ALU</h2>
+                <div class="ternary-display">
+                    <div class="ternary-state positive" id="ternary-pos">
+                        <div class="state-indicator">+1</div>
+                        <div class="state-label">TRUE</div>
+                    </div>
+                    <div class="ternary-state zero" id="ternary-zero">
+                        <div class="state-indicator">0</div>
+                        <div class="state-label">UNKNOWN</div>
+                    </div>
+                    <div class="ternary-state negative" id="ternary-neg">
+                        <div class="state-indicator">-1</div>
+                        <div class="state-label">FALSE</div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Operations</span>
+                    <span class="metric-value" id="ternary-ops">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Avg Latency</span>
+                    <span class="metric-value" id="ternary-latency">0 μs</span>
+                </div>
+                <div class="controls">
+                    <button onclick="runTernaryTest()">RUN TEST</button>
+                    <button onclick="runBenchmark()">BENCHMARK</button>
+                </div>
+            </div>
+            
+            <!-- Topology Panel -->
+            <div class="panel">
+                <h2>∿ TOPOLOGY</h2>
+                <div class="topology-viz">
+                    <div class="topo-node" id="topo-root">ROOT</div>
+                    <div class="topo-node" id="topo-ternary">TERNARY</div>
+                    <div class="topo-node" id="topo-topo">TOPO</div>
+                    <div class="topo-node" id="topo-metrics">METRICS</div>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Nodes</span>
+                    <span class="metric-value" id="topo-nodes">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Edges</span>
+                    <span class="metric-value" id="topo-edges">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Connected</span>
+                    <span class="metric-value" id="topo-connected">-</span>
+                </div>
+            </div>
+            
+            <!-- Telemetry Panel -->
+            <div class="panel">
+                <h2>📊 TELEMETRY</h2>
+                <div class="metric">
+                    <span class="metric-label">Total Events</span>
+                    <span class="metric-value" id="tel-events">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Modules Registered</span>
+                    <span class="metric-value" id="tel-modules">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Lifecycle Transitions</span>
+                    <span class="metric-value" id="tel-lifecycle">0</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="tel-progress"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Event Log Panel -->
+        <div class="panel">
+            <h2>📜 EVENT LOG</h2>
+            <div class="log-container" id="event-log">
+                <div class="log-entry info">System ready. Click INITIALIZE to start.</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { SovereignAscensionEngine } from './src/engine.js';
+        
+        let engine = null;
+        let updateInterval = null;
+        
+        window.initEngine = async () => {
+            try {
+                log('Initializing engine...', 'info');
+                engine = new SovereignAscensionEngine({ frequency: 18432 });
+                await engine.initialize();
+                
+                document.getElementById('engine-state').textContent = 'INITIALIZED';
+                document.getElementById('engine-state').classList.add('active');
+                document.getElementById('btn-start').disabled = false;
+                document.getElementById('btn-init').disabled = true;
+                
+                log('Engine initialized successfully', 'success');
+                updateTelemetry();
+            } catch (error) {
+                log(`Initialization error: ${error.message}`, 'error');
+            }
+        };
+        
+        window.startEngine = async () => {
+            if (!engine) return;
+            try {
+                log('Starting engine modules...', 'info');
+                await engine.start();
+                
+                document.getElementById('engine-state').textContent = 'RUNNING';
+                document.getElementById('engine-state').className = 'metric-value active';
+                document.getElementById('btn-start').disabled = true;
+                document.getElementById('btn-pause').disabled = false;
+                document.getElementById('btn-stop').disabled = false;
+                
+                log('Engine started - all modules active', 'success');
+                startUpdates();
+            } catch (error) {
+                log(`Start error: ${error.message}`, 'error');
+            }
+        };
+        
+        window.pauseEngine = async () => {
+            if (!engine) return;
+            try {
+                await engine.kernel.pause();
+                document.getElementById('engine-state').textContent = 'PAUSED';
+                document.getElementById('engine-state').className = 'metric-value';
+                log('Engine paused', 'warn');
+            } catch (error) {
+                log(`Pause error: ${error.message}`, 'error');
+            }
+        };
+        
+        window.resumeEngine = async () => {
+            if (!engine) return;
+            try {
+                await engine.kernel.resume();
+                document.getElementById('engine-state').textContent = 'RUNNING';
+                document.getElementById('engine-state').className = 'metric-value active';
+                log('Engine resumed', 'success');
+            } catch (error) {
+                log(`Resume error: ${error.message}`, 'error');
+            }
+        };
+        
+        window.stopEngine = async () => {
+            if (!engine) return;
+            try {
+                stopUpdates();
+                await engine.stop();
+                
+                document.getElementById('engine-state').textContent = 'STOPPED';
+                document.getElementById('engine-state').className = 'metric-value error';
+                document.getElementById('btn-start').disabled = false;
+                document.getElementById('btn-pause').disabled = true;
+                document.getElementById('btn-stop').disabled = true;
+                document.getElementById('btn-init').disabled = false;
+                
+                log('Engine stopped', 'warn');
+            } catch (error) {
+                log(`Stop error: ${error.message}`, 'error');
+            }
+        };
+        
+        window.runTernaryTest = async () => {
+            if (!engine || engine.kernel.state !== 'RUNNING') {
+                log('Engine must be running', 'error');
+                return;
+            }
+            
+            // Test operations
+            const ops = [
+                ['NOT', 1],
+                ['AND', 1, -1],
+                ['OR', 0, 1],
+                ['XOR', -1, -1],
+                ['vector', [1, 0, -1, 1, -1]]
+            ];
+            
+            for (const op of ops) {
+                const [name, ...args] = op;
+                const result = engine.executeTernary(name, ...args);
+                log(`Ternary.${name}(${JSON.stringify(args)}) = ${JSON.stringify(result)}`, 'info');
+            }
+            
+            updateTelemetry();
+        };
+        
+        window.runBenchmark = async () => {
+            if (!engine || engine.kernel.state !== 'RUNNING') {
+                log('Engine must be running', 'error');
+                return;
+            }
+            
+            log('Running benchmark (10000 iterations)...', 'info');
+            const results = await engine.runBenchmark(10000);
+            log(`Benchmark complete: ${results.opsPerSecond.toFixed(0)} ops/sec, avg ${results.avgLatencyUs.toFixed(2)} μs`, 'success');
+            updateTelemetry();
+        };
+        
+        function startUpdates() {
+            updateInterval = setInterval(updateTelemetry, 500);
+        }
+        
+        function stopUpdates() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+        }
+        
+        async function updateTelemetry() {
+            if (!engine) return;
+            
+            const status = engine.getStatus();
+            const telem = status.telemetry;
+            
+            // Update UI
+            document.getElementById('engine-uptime').textContent = `${telem.uptime.toFixed(0)} ms`;
+            document.getElementById('engine-freq').textContent = `${status.engine.frequency} Hz`;
+            
+            // Ternary stats
+            if (status.ternary) {
+                document.getElementById('ternary-ops').textContent = status.ternary.operations;
+                if (status.ternary.latency && status.ternary.latency.count > 0) {
+                    document.getElementById('ternary-latency').textContent = 
+                        `${status.ternary.latency.avg.toFixed(2)} μs`;
+                }
+            }
+            
+            // Topology stats
+            if (status.topology) {
+                document.getElementById('topo-nodes').textContent = status.topology.nodes;
+                document.getElementById('topo-edges').textContent = status.topology.edges;
+                document.getElementById('topo-connected').textContent = status.topology.connected ? 'YES' : 'NO';
+                
+                // Animate nodes
+                document.getElementById('topo-root').classList.add('active');
+                document.getElementById('topo-ternary').classList.add('active');
+                document.getElementById('topo-topo').classList.add('active');
+                document.getElementById('topo-metrics').classList.add('active');
+            }
+            
+            // Telemetry stats
+            document.getElementById('tel-events').textContent = telem.counters['lifecycle.transition'] || 0;
+            document.getElementById('tel-modules').textContent = Object.keys(status.modules).length;
+            document.getElementById('tel-lifecycle').textContent = telem.counters['lifecycle.init.complete'] || 0;
+            
+            // Progress bar animation
+            const progress = Math.random() * 100;
+            document.getElementById('tel-progress').style.width = `${progress}%`;
+        }
+        
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('event-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] ${message}`;
+            logContainer.insertBefore(entry, logContainer.firstChild);
+            
+            // Limit log entries
+            while (logContainer.children.length > 100) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+        
+        // Expose functions globally
+        window.log = log;
+    </script>
+</body>
+</html>
