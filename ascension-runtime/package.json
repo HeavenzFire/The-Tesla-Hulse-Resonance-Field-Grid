@@ -1,0 +1,29 @@
+{
+  "name": "ascension-runtime",
+  "version": "1.0.0",
+  "description": "Sovereign Ascension Engine v18433 - Balanced ternary ALU, topology graph, event bus, telemetry",
+  "type": "module",
+  "main": "src/engine.js",
+  "scripts": {
+    "test": "node tests/verification.js",
+    "start": "node --experimental-modules src/engine.js",
+    "benchmark": "node -e \"import('./src/engine.js').then(m => { const e = new m.SovereignAscensionEngine(); e.initialize().then(() => e.start()).then(() => e.runBenchmark(50000)).then(b => console.log(JSON.stringify(b, null, 2))).then(() => e.stop()); })\""
+  },
+  "keywords": [
+    "ternary",
+    "balanced-ternary",
+    "logic-engine",
+    "topology",
+    "graph",
+    "event-bus",
+    "telemetry",
+    "sovereign",
+    "runtime"
+  ],
+  "author": "",
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}
