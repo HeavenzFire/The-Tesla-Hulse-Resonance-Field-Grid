@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1786826459662" clover="3.2.0">
+  <project timestamp="1786826459662" name="All files">
+    <metrics statements="44" coveredstatements="44" conditionals="30" coveredconditionals="30" methods="16" coveredmethods="16" elements="90" coveredelements="90" complexity="0" loc="44" ncloc="44" packages="2" files="7" classes="7"/>
+    <package name="workspace">
+      <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+      <file name="App.tsx" path="/workspace/App.tsx">
+        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="11" type="stmt"/>
+        <line num="28" count="77" type="stmt"/>
+      </file>
+      <file name="constants.ts" path="/workspace/constants.ts">
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="4" count="2" type="stmt"/>
+        <line num="72" count="2" type="stmt"/>
+        <line num="77" count="2" type="stmt"/>
+        <line num="85" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="workspace.components">
+      <metrics statements="37" coveredstatements="37" conditionals="30" coveredconditionals="30" methods="14" coveredmethods="14"/>
+      <file name="Header.tsx" path="/workspace/components/Header.tsx">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="9" count="2" type="stmt"/>
+        <line num="10" count="16" type="stmt"/>
+      </file>
+      <file name="ImplementationPathways.tsx" path="/workspace/components/ImplementationPathways.tsx">
+        <metrics statements="11" coveredstatements="11" conditionals="8" coveredconditionals="8" methods="4" coveredmethods="4"/>
+        <line num="9" count="2" type="stmt"/>
+        <line num="10" count="76" type="stmt"/>
+        <line num="11" count="76" type="stmt"/>
+        <line num="12" count="214" type="cond" truecount="4" falsecount="0"/>
+        <line num="13" count="62" type="stmt"/>
+        <line num="15" count="152" type="cond" truecount="4" falsecount="0"/>
+        <line num="16" count="7" type="stmt"/>
+        <line num="18" count="145" type="stmt"/>
+        <line num="22" count="2" type="stmt"/>
+        <line num="23" count="18" type="stmt"/>
+        <line num="33" count="76" type="stmt"/>
+      </file>
+      <file name="Quote.tsx" path="/workspace/components/Quote.tsx">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="9" count="2" type="stmt"/>
+        <line num="10" count="17" type="stmt"/>
+      </file>
+      <file name="Section.tsx" path="/workspace/components/Section.tsx">
+        <metrics statements="11" coveredstatements="11" conditionals="14" coveredconditionals="14" methods="4" coveredmethods="4"/>
+        <line num="11" count="3" type="stmt"/>
+        <line num="12" count="208" type="stmt"/>
+        <line num="13" count="208" type="stmt"/>
+        <line num="14" count="572" type="cond" truecount="4" falsecount="0"/>
+        <line num="15" count="113" type="stmt"/>
+        <line num="17" count="459" type="cond" truecount="4" falsecount="0"/>
+        <line num="18" count="69" type="stmt"/>
+        <line num="20" count="390" type="stmt"/>
+        <line num="24" count="3" type="stmt"/>
+        <line num="25" count="97" type="stmt"/>
+        <line num="40" count="203" type="stmt"/>
+      </file>
+      <file name="VisionStatement.tsx" path="/workspace/components/VisionStatement.tsx">
+        <metrics statements="11" coveredstatements="11" conditionals="8" coveredconditionals="8" methods="4" coveredmethods="4"/>
+        <line num="9" count="2" type="stmt"/>
+        <line num="10" count="95" type="stmt"/>
+        <line num="11" count="95" type="stmt"/>
+        <line num="12" count="171" type="cond" truecount="4" falsecount="0"/>
+        <line num="13" count="19" type="stmt"/>
+        <line num="15" count="152" type="cond" truecount="4" falsecount="0"/>
+        <line num="16" count="19" type="stmt"/>
+        <line num="18" count="133" type="stmt"/>
+        <line num="22" count="2" type="stmt"/>
+        <line num="23" count="19" type="stmt"/>
+        <line num="33" count="95" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>

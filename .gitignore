@@ -1,3 +1,4 @@
+Nothing should be ignored in this case, as the only change is adding a test file (.ts file) which is source code and should be tracked.
 ```
 # Dependencies
 node_modules/
