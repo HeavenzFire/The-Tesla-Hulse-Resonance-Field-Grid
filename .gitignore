@@ -1,56 +1,37 @@
-Nothing should be ignored in this case, as the only change is adding a test file (.ts file) which is source code and should be tracked.
 ```
-# Dependencies
-node_modules/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 # Build artifacts
-dist/
 build/
-coverage/
-.nyc_output/
-.vite/
-.rollup.cache/
+dist/
 
-# Environment variables
-.env
-.env.local
-.env.*
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
+# Virtual environments
+venv/
+.venv/
+env/
 
 # Logs
 *.log
 
-# OS generated files
-.DS_Store
-Thumbs.db
-
 # Temporary files
 *.tmp
-*.temp
+*.swp
 
-# Package lock files
-package-lock.json
-.yarn/
-node_modules/.cache/
+# IDE
+.vscode/
+.idea/
 
-# Browser-specific files
-.safari_driver/
-.chrome_driver/
-
-# Test coverage
+# Coverage
+.coverage
 coverage/
-.nyc_output/
+htmlcov/
 
-# TypeScript
-*.tsbuildinfo
-.dist/
-
-# Vite specific
-!.vite/assets/
-vite.config.js.timestamp*
+# Environment variables
+.env
+.env.local
+*.env.*
 ```
