@@ -1,4 +1,3 @@
-Nothing should be ignored in this case, as the only change is adding a test file (.ts file) which is source code and should be tracked.
 ```
 # Dependencies
 node_modules/
@@ -6,51 +5,70 @@ node_modules/
 # Build artifacts
 dist/
 build/
-coverage/
-.nyc_output/
-.vite/
-.rollup.cache/
+target/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.python-version
+
+# Logs
+*.log
 
 # Environment variables
 .env
 .env.local
 .env.*
 
-# IDE and editor files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*.tmp
 
-# Logs
-*.log
-
-# OS generated files
+# OS
 .DS_Store
 Thumbs.db
 
-# Temporary files
-*.tmp
-*.temp
-
-# Package lock files
-package-lock.json
-.yarn/
-node_modules/.cache/
-
-# Browser-specific files
-.safari_driver/
-.chrome_driver/
-
-# Test coverage
+# Testing
 coverage/
+htmlcov/
+.coverage
 .nyc_output/
+coverage-final.json
 
-# TypeScript
-*.tsbuildinfo
-.dist/
+# Compression
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 
-# Vite specific
-!.vite/assets/
-vite.config.js.timestamp*
+# Vite/Vitest
+.node_modules/.vite/
 ```
