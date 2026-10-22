@@ -202,3 +202,34 @@ class AppendOnlyEventLog:
             seen.add(event["event_id"])
             previous = expected
         return previous == self._head and seen == self._event_ids
+
+
+class MeshCoordinator:
+    """Integrate bounded routing and append-only audit events without executing task payloads."""
+
+    def __init__(self, router: MeshRouter | None = None, event_log: AppendOnlyEventLog | None = None) -> None:
+        self.router = router or MeshRouter()
+        self.event_log = event_log or AppendOnlyEventLog()
+
+    def dispatch(self, signed_envelope: dict[str, Any], key: bytes, now: int | None = None) -> dict[str, str]:
+        result = self.router.route(signed_envelope, key, now)
+        if result["status"] == "ASSIGNED":
+            self.event_log.append(
+                "task-assigned:" + result["task_id"],
+                "TASK_ASSIGNED",
+                {"task_id": result["task_id"], "node_id": result["node_id"]},
+                int(time.time()) if now is None else int(now),
+            )
+        return result
+
+    def complete_task(self, task_id: str, result: Any = None, timestamp: int | None = None) -> dict[str, Any]:
+        # Validate audit payload serialization before releasing node capacity.
+        canonical_json({"result": result})
+        completion = self.router.complete_task(task_id, result)
+        self.event_log.append(
+            "task-completed:" + task_id,
+            "TASK_COMPLETED",
+            {"task_id": task_id, "node_id": completion["node_id"], "result": completion["result"]},
+            int(time.time()) if timestamp is None else int(timestamp),
+        )
+        return completion
