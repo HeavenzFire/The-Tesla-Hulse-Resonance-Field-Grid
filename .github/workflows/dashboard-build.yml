@@ -1,4 +1,4 @@
-name: Dashboard build validation
+name: Dashboard and scientific-kernel validation
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  dashboard-build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -20,3 +20,20 @@ jobs:
           node-version: 22
       - run: npm install
       - run: npm run build
+  scientific-kernel-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run deterministic scientific-kernel tests
+        run: python -m unittest discover -s tests -v
+      - name: Generate reproducible experiment artifacts
+        run: python -c "from hf_science.metrics import export_experiment; print(export_experiment('artifacts'))"
+      - name: Upload experiment artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-intervention-artifacts
+          path: artifacts/*.json
