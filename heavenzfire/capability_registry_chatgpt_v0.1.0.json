@@ -1,0 +1,24 @@
+{
+  "schema_version": "0.1.0",
+  "platform": "chatgpt",
+  "verified_at": "2026-10-21T00:00:00Z",
+  "evidence_basis": "Observed tools available in the current session and successful GitHub repository writes. This entry describes this session, not every ChatGPT deployment.",
+  "capabilities": {
+    "read_pasted_json": true,
+    "read_uploaded_files": true,
+    "write_github_files": true,
+    "run_github_actions": true,
+    "web_search": true,
+    "python_execution": true,
+    "python_runtime_direct_internet": false,
+    "direct_private_meta_share_fetch": false,
+    "arbitrary_browser_automation_of_other_ai_uis": false,
+    "direct_api_access_to_other_ai_platforms": false,
+    "portable_file_interchange": true
+  },
+  "limitations": [
+    "GitHub access is provided by an authenticated connector and does not imply access to private AI conversations.",
+    "The Meta artifact files referenced in the handoff were not attached, so their exact bytes and reported SHA-256 were not verified.",
+    "No Gemini session or independent external agent was executed."
+  ]
+}
