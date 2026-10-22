@@ -66,6 +66,32 @@ class RoutingTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             router.complete_task("unknown")
 
+    def test_coordinator_routes_completes_and_audits_idempotently(self):
+        from hf_federation.mesh import MeshCoordinator
+        coordinator = MeshCoordinator()
+        node = SandboxNode("node-a", {"python-tests"}, max_active_tasks=1)
+        coordinator.router.register(node)
+        dispatched = coordinator.dispatch(envelope("task-1"), KEY, now=101)
+        self.assertEqual(dispatched["status"], "ASSIGNED")
+        self.assertEqual(len(coordinator.event_log.events), 1)
+        completed = coordinator.complete_task("task-1", {"passed": True}, timestamp=102)
+        self.assertEqual(completed["status"], "COMPLETED")
+        self.assertEqual(node.active_task_ids, set())
+        self.assertEqual(coordinator.complete_task("task-1", {"passed": False}, timestamp=103), completed)
+        self.assertEqual(len(coordinator.event_log.events), 2)
+        self.assertEqual([event["event_type"] for event in coordinator.event_log.events], ["TASK_ASSIGNED", "TASK_COMPLETED"])
+        self.assertTrue(coordinator.event_log.verify())
+
+    def test_coordinator_rejects_non_json_completion_before_releasing_capacity(self):
+        from hf_federation.mesh import MeshCoordinator
+        coordinator = MeshCoordinator()
+        node = SandboxNode("node-a", {"python-tests"})
+        coordinator.router.register(node)
+        coordinator.dispatch(envelope("task-1"), KEY, now=101)
+        with self.assertRaises((TypeError, ValueError)):
+            coordinator.complete_task("task-1", {"bad": float("nan")}, timestamp=102)
+        self.assertIn("task-1", node.active_task_ids)
+
     def test_no_capability_match_fails_closed(self):
         router = MeshRouter()
         router.register(SandboxNode("node-a", {"python-tests"}))
