@@ -52,7 +52,7 @@
       "artifact_id": "A-001",
       "type": "json-schema",
       "path": "heavenzfire/interchange_schema_v0.1.0.json",
-      "hash": "e6379f459bf686c80831ddee7f58ffbc9cd44f6dc8f7d58ede4530e8cf2fb1e5"
+      "hash": "afbc083641336ba361d0de319d1cb03b2a07aab83a7205e4b4c6c01176316c0f"
     },
     {
       "artifact_id": "A-002",
