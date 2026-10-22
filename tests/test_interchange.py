@@ -38,7 +38,7 @@ class InterchangeTests(unittest.TestCase):
         self.assertIsNone(example["conversation_reference"]["share_url"])
         self.assertFalse(example["conversation_reference"]["retrievable"])
         self.assertIn("not attached", example["conversation_reference"]["last_verified_message"])
-        self.assertTrue(any("exact bytes" in x for x in example["capability_registry"][0]["limitations"]))
+        self.assertTrue(any("SHA-256" in x for x in example["capability_registry"][0]["limitations"]))
         self.assertEqual("partial", next(t["status"] for t in example["task_status"] if t["task_id"] == "T-004"))
 
     def test_hash_artifacts(self):
