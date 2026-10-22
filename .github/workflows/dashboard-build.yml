@@ -33,7 +33,9 @@ jobs:
       - name: Run scientific and interchange tests
         run: python -m unittest discover -s tests -v
       - name: Generate reproducible experiment artifacts
-        run: python -c "from hf_science.metrics import export_experiment; print(export_experiment('artifacts'))"
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: python -c "import os; from hf_science.metrics import export_experiment; print(export_experiment('artifacts', code_revision=os.environ['GITHUB_SHA']))"
       - name: Upload experiment artifacts
         uses: actions/upload-artifact@v4
         with:
