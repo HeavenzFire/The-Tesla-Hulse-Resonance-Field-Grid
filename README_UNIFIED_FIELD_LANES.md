@@ -1,25 +1,29 @@
-# Unified Field Lanes A-D — reproducible research kernel
+# Unified Field Lanes A–D — reproducible kernel and local mesh coordinator
 
-This branch adds a deterministic, standard-library-only Python research kernel for the four open microtasks. It is deliberately separate from the React telemetry dashboard and labels all experiment output as **synthetic toy-model data**, not physical electromagnetic measurements or a validated EM solver.
+This branch adds deterministic scientific metrics plus a local-first task-routing and event-synchronization core. Scientific experiment output is explicitly labeled **synthetic toy-model data**, not physical electromagnetic measurements or a validated EM solver.
 
-## Run locally
-
-From the repository root with Python 3.12+:
+## Run locally (PowerShell)
 
 ```powershell
 python -m unittest discover -s tests -v
 python -c "from hf_science.metrics import export_experiment; print(export_experiment('artifacts'))"
 ```
 
-The export command writes `artifacts/mesh_history.json` and `artifacts/final_states.json`. Both include seed/configuration, topology, metric definitions, and explicit synthetic-data provenance. The CI workflow uploads them as an artifact.
+The export command writes `artifacts/mesh_history.json` and `artifacts/final_states.json`. CI uploads them as an artifact.
 
-## Lane contracts
+## Lanes A–D
 
-- **A — Hopf amplitude:** `raw_norm_sq`, `raw_norm`, normalized input and Hopf direction are separate. Zero/near-zero input returns a null projection instead of dividing by a tiny norm. The test fixture is illustrative; it does not claim to reconstruct the original SB-0 probe because its raw artifacts are not in this repository.
-- **B — Braid metrics:** per-edge signed wrapped angle, per-edge absolute angle, snapshot mean absolute angle, snapshot sum absolute angle, and accumulated sum across snapshots are distinct fields with radian units and explicit window semantics. Collision impulse is a separate event field.
-- **C — Ring+2 topology:** six-node ring plus distance-two shortcuts are represented as unique undirected edges (12 edges, degree 4). Forward-oriented directed arcs are reported separately (18 arcs for six nodes).
-- **D — Intervention:** baseline, kick-only, collision-only, and kick-plus-collision arms share one seeded initial state. Per-step histories and final states are exported with a repeatability signature. The experiment demonstrates deterministic execution only; it does not establish physical validity or causal efficacy.
+- **A — Hopf amplitude:** raw norm and normalized Hopf direction are separate; near-zero input returns a null projection. The test reconstructs a mathematical fixture from rounded reported coordinates and raw norm; it does not reproduce the original probe without its raw artifacts.
+- **B — Braid metrics:** per-edge signed wrapped angle, per-edge absolute angle, snapshot mean/sum and accumulated sum are separate fields with radian units and explicit windows. Collision impulse is a distinct event field.
+- **C — Ring+2 topology:** six-node ring plus distance-two shortcuts yields 12 unique undirected edges, degree 4 per node; directed forward arcs are reported separately.
+- **D — Intervention:** four seeded arms (baseline, kick, collision, kick+collision) share one initial state. Per-step histories and final states are exported with configuration and provenance. This demonstrates deterministic execution only, not physical validity or causal efficacy.
 
-## Acceptance boundary
+## Local micro-sandbox / mesh core
 
-Passing unit tests verifies these code contracts and deterministic toy experiment only. The original probe files and validated physical simulation are not bundled, so live probe reproduction and electromagnetic claims remain **UNKNOWN / NOT VERIFIED**. The experiment's collision impulse is a declared toy phase perturbation, not a physical collision model.
+`hf_federation.mesh` provides:
+
+- HMAC-SHA256 signed task envelopes with deadlines and tamper detection (caller supplies the secret key; do not commit production secrets).
+- Capability- and capacity-aware routing across registered ALIVE nodes, with explicit DARK reasons, deterministic least-loaded selection and idempotent task assignment.
+- A hash-chained append-only event log and contiguous, tamper-checked, duplicate-safe event import for mesh synchronization.
+
+This is a **coordination primitive**, not a deployed multi-machine federation. It does not create GitHub Codespaces, execute arbitrary task payloads, establish network transport, isolate OS processes, provide key rotation, or replace production identity/authorization. Those require adapters, real isolation and operational deployment tests. The current CI validates the local core only.
