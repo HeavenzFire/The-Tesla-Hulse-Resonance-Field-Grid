@@ -28,7 +28,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Run deterministic scientific-kernel tests
+      - name: Install interchange schema validator
+        run: python -m pip install -r requirements-interchange.txt
+      - name: Run scientific and interchange tests
         run: python -m unittest discover -s tests -v
       - name: Generate reproducible experiment artifacts
         run: python -c "from hf_science.metrics import export_experiment; print(export_experiment('artifacts'))"
