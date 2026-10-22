@@ -23,7 +23,7 @@ function exportSamples(format: string, samples: Sample[]) {
   if (format === 'json') download(base + '.json', JSON.stringify({ schema: 'heavenzfire.telemetry.v1', generatedAt: stamp(), provenance: 'SIMULATED_DEMO_DATA', samples }, null, 2), 'application/json');
   if (format === 'csv' || format === 'tsv') {
     const sep = format === 'csv' ? ',' : '\t';
-    const rows = [['timestamp', 'resonance_index', 'flux_index', 'harmonic'], ...samples.map(s => [s.t, s.resonance.toFixed(5), s.flux.toFixed(5), String(s.harmonic)])];
+    const rows = [['timestamp', 'resonance_index', 'flux_index', 'harmonic', 'provenance'], ...samples.map(s => [s.t, s.resonance.toFixed(5), s.flux.toFixed(5), String(s.harmonic), 'SIMULATED_DEMO_DATA'])];
     download(base + '.' + format, rows.map(r => r.join(sep)).join('\n'), format === 'csv' ? 'text/csv' : 'text/tab-separated-values');
   }
   if (format === 'vtk') {
