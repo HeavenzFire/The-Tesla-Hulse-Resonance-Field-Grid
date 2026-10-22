@@ -152,7 +152,7 @@
               "string",
               "null"
             ],
-            "pattern": "^[0-9a-fA-F]{12,64}$"
+            "pattern": "^[0-9a-fA-F]{64}$"
           }
         }
       }
@@ -245,7 +245,9 @@
       "required": [
         "platform",
         "capabilities",
-        "evidence_basis"
+        "evidence_basis",
+        "verified_at",
+        "limitations"
       ],
       "properties": {
         "platform": {
@@ -254,7 +256,7 @@
         "capabilities": {
           "type": "object",
           "additionalProperties": {
-            "type": "boolean"
+            "type": ["boolean", "null"]
           }
         },
         "evidence_basis": {
