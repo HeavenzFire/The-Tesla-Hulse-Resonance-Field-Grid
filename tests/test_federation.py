@@ -37,6 +37,9 @@ class EnvelopeTests(unittest.TestCase):
         signed = envelope()
         signed["payload"]["objective"] = "different objective"
         self.assertFalse(verify_envelope(signed, KEY, now=101))
+        signed_deadline = envelope()
+        signed_deadline["payload"]["deadline"] = 150  # still valid at now=101, but no longer signed
+        self.assertFalse(verify_envelope(signed_deadline, KEY, now=101))
 
 
 class RoutingTests(unittest.TestCase):
@@ -48,6 +51,20 @@ class RoutingTests(unittest.TestCase):
         result = router.route(envelope(), KEY, now=101)
         self.assertEqual(result, {"task_id": "task-1", "node_id": "node-a", "status": "ASSIGNED"})
         self.assertEqual(router.route(envelope(), KEY, now=101)["status"], "ALREADY_ASSIGNED")
+
+    def test_completion_releases_capacity_but_preserves_idempotence(self):
+        router = MeshRouter()
+        node = SandboxNode("node-a", {"python-tests"}, max_active_tasks=1)
+        router.register(node)
+        router.route(envelope("task-1"), KEY, now=101)
+        completed = router.complete_task("task-1", {"passed": True})
+        self.assertEqual(completed["status"], "COMPLETED")
+        self.assertEqual(node.active_task_ids, set())
+        self.assertEqual(router.complete_task("task-1", {"passed": False}), completed)
+        self.assertEqual(router.route(envelope("task-1"), KEY, now=101)["status"], "COMPLETED")
+        self.assertEqual(router.route(envelope("task-2"), KEY, now=101)["status"], "ASSIGNED")
+        with self.assertRaises(ValueError):
+            router.complete_task("unknown")
 
     def test_no_capability_match_fails_closed(self):
         router = MeshRouter()
@@ -75,6 +92,33 @@ class MeshSyncTests(unittest.TestCase):
         self.assertTrue(replica.verify())
         self.assertEqual(replica.head, source.head)
         self.assertEqual(replica.import_events(copy.deepcopy(source.events)), {"imported": 0, "skipped_duplicates": 2})
+
+    def test_append_and_import_defensively_copy_nested_data(self):
+        log = AppendOnlyEventLog()
+        data = {"nested": {"state": "ALIVE"}}
+        returned = log.append("e1", "HEALTH", data, 101)
+        data["nested"]["state"] = "DARK"
+        returned["data"]["nested"]["state"] = "MUTATED"
+        self.assertTrue(log.verify())
+        self.assertEqual(log.events[0]["data"]["nested"]["state"], "ALIVE")
+        replica = AppendOnlyEventLog()
+        incoming = copy.deepcopy(log.events)
+        replica.import_events(incoming)
+        incoming[0]["data"]["nested"]["state"] = "MUTATED_AGAIN"
+        self.assertEqual(replica.events[0]["data"]["nested"]["state"], "ALIVE")
+
+    def test_malformed_sync_event_raises_value_error(self):
+        replica = AppendOnlyEventLog()
+        with self.assertRaises(ValueError):
+            replica.import_events([{"event_id": "missing-body"}])
+        with self.assertRaises(ValueError):
+            replica.import_events([{"event_id": "e1", "event_type": "X", "data": {}, "timestamp": 1, "previous_hash": "0" * 64, "event_hash": "é"}])
+
+    def test_nonfinite_json_values_rejected(self):
+        from hf_federation.mesh import canonical_json
+        for value in (float("nan"), float("inf"), float("-inf")):
+            with self.assertRaises(ValueError):
+                canonical_json({"value": value})
 
     def test_tampered_or_noncontiguous_event_rejected(self):
         source = AppendOnlyEventLog()
