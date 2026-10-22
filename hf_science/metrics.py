@@ -113,6 +113,7 @@ def run_intervention_experiment(seed: int = 20261021, steps: int = 80, intervent
         history = []
         accumulated_braid = 0.0
         for step in range(steps):
+            snapshot_phases = phases[:]
             if step == intervention_step and kick_enabled:
                 phases[0] = wrap_angle(phases[0] + 1.2)
             collision_impulse = 0.0
@@ -142,7 +143,7 @@ def run_intervention_experiment(seed: int = 20261021, steps: int = 80, intervent
                 "sum_absolute_edge_angle_rad": metrics["sum_absolute_edge_angle_rad"],
                 "accumulated_braid_rad": accumulated_braid,
                 "collision_impulse_rad": collision_impulse,
-                "phases": phases[:],
+                "phases": snapshot_phases,
             })
         outputs[name] = {
             "intervention": {"kick": kick_enabled, "collision": collision_enabled},
@@ -190,7 +191,7 @@ def run_signature(outputs: dict[str, Any]) -> str:
 
 def export_experiment(output_dir: str | Path, seed: int = 20261021, steps: int = 80) -> dict[str, str]:
     """Write mesh_history.json and final_states.json with seed/config/revision provenance."""
-    result = run_intervention_experiment(seed=seed, steps=steps)
+    result = run_intervention_experiment(seed=seed, steps=steps, intervention_step=max(1, min(20, steps - 1)))
     directory = Path(output_dir)
     directory.mkdir(parents=True, exist_ok=True)
     history_path = directory / "mesh_history.json"
