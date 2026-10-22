@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import copy
 import json
 import time
 from dataclasses import asdict, dataclass, field
@@ -14,7 +15,7 @@ from typing import Any
 
 
 def canonical_json(value: Any) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode("utf-8")
 
 
 @dataclass(frozen=True)
@@ -86,6 +87,7 @@ class MeshRouter:
     def __init__(self) -> None:
         self.nodes: dict[str, SandboxNode] = {}
         self.assignments: dict[str, str] = {}
+        self.completions: dict[str, dict[str, Any]] = {}
 
     def register(self, node: SandboxNode) -> None:
         existing = self.nodes.get(node.node_id)
@@ -99,7 +101,8 @@ class MeshRouter:
         payload = signed_envelope["payload"]
         task_id = payload["task_id"]
         if task_id in self.assignments:
-            return {"task_id": task_id, "node_id": self.assignments[task_id], "status": "ALREADY_ASSIGNED"}
+            status = "COMPLETED" if task_id in self.completions else "ALREADY_ASSIGNED"
+            return {"task_id": task_id, "node_id": self.assignments[task_id], "status": status}
         required = set(payload["required_capabilities"])
         candidates = [
             node for node in self.nodes.values()
@@ -113,6 +116,18 @@ class MeshRouter:
         node.active_task_ids.add(task_id)
         self.assignments[task_id] = node.node_id
         return {"task_id": task_id, "node_id": node.node_id, "status": "ASSIGNED"}
+
+    def complete_task(self, task_id: str, result: Any = None) -> dict[str, Any]:
+        """Release node capacity while retaining an idempotent assignment/completion record."""
+        if task_id in self.completions:
+            return copy.deepcopy(self.completions[task_id])
+        node_id = self.assignments.get(task_id)
+        if node_id is None:
+            raise ValueError(f"task is not assigned: {task_id}")
+        self.nodes[node_id].active_task_ids.discard(task_id)
+        completion = {"task_id": task_id, "node_id": node_id, "status": "COMPLETED", "result": copy.deepcopy(result)}
+        self.completions[task_id] = completion
+        return copy.deepcopy(completion)
 
 
 class AppendOnlyEventLog:
@@ -130,11 +145,11 @@ class AppendOnlyEventLog:
         if not event_id or not event_type:
             raise ValueError("event_id and event_type are required")
         if event_id in self._event_ids:
-            return next(e for e in self.events if e["event_id"] == event_id)
+            return copy.deepcopy(next(e for e in self.events if e["event_id"] == event_id))
         body = {
             "event_id": event_id,
             "event_type": event_type,
-            "data": data,
+            "data": copy.deepcopy(data),
             "timestamp": int(timestamp),
             "previous_hash": self._head,
         }
@@ -143,32 +158,46 @@ class AppendOnlyEventLog:
         self.events.append(event)
         self._event_ids.add(event_id)
         self._head = digest
-        return event
+        return copy.deepcopy(event)
 
     def import_events(self, incoming: list[dict[str, Any]]) -> dict[str, int]:
         imported = skipped = 0
         for event in incoming:
-            if event["event_id"] in self._event_ids:
-                skipped += 1
-                continue
-            # Only append a contiguous, independently verifiable event from this log's current head.
-            body = {k: event[k] for k in ("event_id", "event_type", "data", "timestamp", "previous_hash")}
-            expected = hashlib.sha256(canonical_json(body)).hexdigest()
-            if event.get("previous_hash") != self._head or not hmac.compare_digest(event.get("event_hash", ""), expected):
-                raise ValueError("event chain mismatch; refusing non-contiguous or tampered sync event")
-            self.events.append(dict(event))
-            self._event_ids.add(event["event_id"])
-            self._head = expected
-            imported += 1
+            try:
+                if not isinstance(event, dict):
+                    raise ValueError("malformed sync event")
+                event_id = event["event_id"]
+                if event_id in self._event_ids:
+                    skipped += 1
+                    continue
+                # Only append a contiguous, independently verifiable event from this log's current head.
+                body = {k: event[k] for k in ("event_id", "event_type", "data", "timestamp", "previous_hash")}
+                expected = hashlib.sha256(canonical_json(body)).hexdigest()
+                event_hash = event.get("event_hash")
+                if (event["previous_hash"] != self._head or not isinstance(event_hash, str)
+                        or not hmac.compare_digest(event_hash.encode("ascii", errors="strict"), expected.encode("ascii"))):
+                    raise ValueError("event chain mismatch; refusing non-contiguous or tampered sync event")
+                self.events.append(copy.deepcopy(event))
+                self._event_ids.add(event_id)
+                self._head = expected
+                imported += 1
+            except (KeyError, TypeError, UnicodeError) as exc:
+                raise ValueError("malformed sync event") from exc
         return {"imported": imported, "skipped_duplicates": skipped}
 
     def verify(self) -> bool:
         previous = "0" * 64
         seen = set()
         for event in self.events:
-            body = {k: event[k] for k in ("event_id", "event_type", "data", "timestamp", "previous_hash")}
-            expected = hashlib.sha256(canonical_json(body)).hexdigest()
-            if event["event_id"] in seen or event["previous_hash"] != previous or not hmac.compare_digest(event["event_hash"], expected):
+            try:
+                body = {k: event[k] for k in ("event_id", "event_type", "data", "timestamp", "previous_hash")}
+                expected = hashlib.sha256(canonical_json(body)).hexdigest()
+                event_hash = event["event_hash"]
+                if (event["event_id"] in seen or event["previous_hash"] != previous
+                        or not isinstance(event_hash, str)
+                        or not hmac.compare_digest(event_hash.encode("ascii", errors="strict"), expected.encode("ascii"))):
+                    return False
+            except (KeyError, TypeError, ValueError, UnicodeError):
                 return False
             seen.add(event["event_id"])
             previous = expected
