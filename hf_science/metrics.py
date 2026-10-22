@@ -93,7 +93,7 @@ def _variance(values: list[float]) -> float:
     return sum((x - mean) ** 2 for x in values) / len(values)
 
 
-def run_intervention_experiment(seed: int = 20261021, steps: int = 80, intervention_step: int = 20) -> dict[str, Any]:
+def run_intervention_experiment(seed: int = 20261021, steps: int = 80, intervention_step: int = 20, code_revision: str | None = None) -> dict[str, Any]:
     """Paired four-arm phase toy experiment with deterministic seed and complete per-step traces."""
     if steps < 2 or not 0 < intervention_step < steps:
         raise ValueError("require steps >= 2 and 0 < intervention_step < steps")
@@ -113,7 +113,6 @@ def run_intervention_experiment(seed: int = 20261021, steps: int = 80, intervent
         history = []
         accumulated_braid = 0.0
         for step in range(steps):
-            snapshot_phases = phases[:]
             if step == intervention_step and kick_enabled:
                 phases[0] = wrap_angle(phases[0] + 1.2)
             collision_impulse = 0.0
@@ -122,6 +121,7 @@ def run_intervention_experiment(seed: int = 20261021, steps: int = 80, intervent
                 collision_impulse = 0.35
                 phases[0] = wrap_angle(phases[0] - collision_impulse / 2)
                 phases[1] = wrap_angle(phases[1] + collision_impulse / 2)
+            snapshot_phases = phases[:]
             metrics = braid_metrics(phases, edges)
             accumulated_braid += metrics["sum_absolute_edge_angle_rad"]
             variance = _variance(phases)
@@ -137,7 +137,7 @@ def run_intervention_experiment(seed: int = 20261021, steps: int = 80, intervent
                 "step": step,
                 "seed": seed,
                 "config": {"nodes": NODES, "coupling": 0.08, "intervention_step": intervention_step},
-                "raw_state_norms": [1.0 for _ in phases],
+                "raw_state_norms": [1.0 for _ in phases],  # phase-only model convention, not measured amplitude
                 "phase_variance": variance,
                 "mean_absolute_edge_angle_rad": metrics["mean_absolute_edge_angle_rad"],
                 "sum_absolute_edge_angle_rad": metrics["sum_absolute_edge_angle_rad"],
@@ -162,13 +162,14 @@ def run_intervention_experiment(seed: int = 20261021, steps: int = 80, intervent
         "schema": "heavenzfire.intervention-experiment.v1",
         "provenance": "SYNTHETIC_TOY_MODEL_NOT_PHYSICAL_EM_SIMULATION",
         "seed": seed,
-        "code_revision": "recorded_by_ci_or_caller",
+        "code_revision": code_revision,
         "topology": topology,
         "metric_contract": {
             "phase_variance": "population variance of wrapped node phases; radian^2",
             "mean_absolute_edge_angle_rad": "mean absolute wrapped phase difference across unique undirected edges per snapshot",
             "accumulated_braid_rad": "sum of per-snapshot sum_absolute_edge_angle_rad; radian-snapshots",
             "collision_impulse_rad": "toy paired phase impulse; separate from braid metrics",
+            "raw_state_norms": "unit amplitude by construction in this phase-only intervention model; not a measured raw amplitude",
         },
         "parameters": {"steps": steps, "intervention_step": intervention_step, "coupling": 0.08},
         "arms": outputs,
@@ -189,9 +190,9 @@ def run_signature(outputs: dict[str, Any]) -> str:
     return json.dumps(summary, sort_keys=True, separators=(",", ":"))
 
 
-def export_experiment(output_dir: str | Path, seed: int = 20261021, steps: int = 80) -> dict[str, str]:
+def export_experiment(output_dir: str | Path, seed: int = 20261021, steps: int = 80, code_revision: str | None = None) -> dict[str, str]:
     """Write mesh_history.json and final_states.json with seed/config/revision provenance."""
-    result = run_intervention_experiment(seed=seed, steps=steps, intervention_step=max(1, min(20, steps - 1)))
+    result = run_intervention_experiment(seed=seed, steps=steps, intervention_step=max(1, min(20, steps - 1)), code_revision=code_revision)
     directory = Path(output_dir)
     directory.mkdir(parents=True, exist_ok=True)
     history_path = directory / "mesh_history.json"
