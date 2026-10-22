@@ -1,0 +1,120 @@
+{
+  "version": "0.1.0",
+  "project_id": "heavenzfire-unified-field",
+  "source_platform": "chatgpt",
+  "conversation_reference": {
+    "share_url": null,
+    "local_id": "chatgpt_current_session",
+    "retrievable": false,
+    "last_verified_message": "Meta AI handoff pasted into this conversation; original Meta artifact files were not attached"
+  },
+  "objective": "Continue engineering the HeavenzFire Unified Field as a testable, local-first AI agent framework.",
+  "decisions": [
+    {
+      "id": "D-001",
+      "statement": "Use file-based JSON interchange as the primary portable cross-AI handoff; a share URL is not API authorization.",
+      "timestamp": "2026-10-21T00:00:00Z",
+      "status": "accepted"
+    }
+  ],
+  "task_status": [
+    {
+      "task_id": "T-001",
+      "title": "Determine cross-AI import/export mechanisms supported",
+      "status": "verified_for_current_session",
+      "evidence": "This session can read pasted JSON and use connected GitHub/web tools; it has no direct access to the private Meta AI session.",
+      "owner": "chatgpt"
+    },
+    {
+      "task_id": "T-002",
+      "title": "Produce interchange schema and adapter plan",
+      "status": "implemented_in_repository",
+      "evidence": "Schema and adapter plan committed on the active feature branch; CI result pending for this commit.",
+      "owner": "chatgpt"
+    },
+    {
+      "task_id": "T-003",
+      "title": "Implement executable interchange tests",
+      "status": "implemented_in_repository",
+      "evidence": "Tests validate this example and capability claims; exact Meta files were not available to run.",
+      "owner": "chatgpt"
+    },
+    {
+      "task_id": "T-004",
+      "title": "Collect capability registry entries from other platforms",
+      "status": "partial",
+      "evidence": "ChatGPT entry describes only capabilities evidenced in this session; Gemini and Meta entries remain source-provided or unverified here.",
+      "owner": "chatgpt,gemini,meta_ai"
+    }
+  ],
+  "artifacts": [
+    {
+      "artifact_id": "A-001",
+      "type": "json-schema",
+      "path": "heavenzfire/interchange_schema_v0.1.0.json",
+      "hash": null
+    },
+    {
+      "artifact_id": "A-002",
+      "type": "adapter-plan",
+      "path": "heavenzfire/adapter_plan_v0.1.0.md",
+      "hash": null
+    },
+    {
+      "artifact_id": "A-003",
+      "type": "capability-registry",
+      "path": "heavenzfire/capability_registry_chatgpt_v0.1.0.json",
+      "hash": null
+    }
+  ],
+  "test_results": [],
+  "next_actions": [
+    {
+      "action": "Attach or upload the original Meta AI interchange artifacts so their exact bytes and reported digest can be verified.",
+      "requires_auth": false,
+      "assignee": "user"
+    },
+    {
+      "action": "Run the schema and tests in GitHub Actions, then update this handoff with the resulting run URL and commit SHA.",
+      "requires_auth": false,
+      "assignee": "chatgpt"
+    },
+    {
+      "action": "Add platform capability entries only with evidence references; mark unsupported or unverified capabilities false/unknown rather than assuming access.",
+      "requires_auth": false,
+      "assignee": "heavenzfire"
+    }
+  ],
+  "permissions": {
+    "allow_network": false,
+    "allow_code_exec": true,
+    "allow_file_write": true,
+    "sensitive_actions_require_explicit_auth": true
+  },
+  "capability_registry": [
+    {
+      "platform": "chatgpt",
+      "capabilities": {
+        "read_pasted_json": true,
+        "read_uploaded_files": true,
+        "write_github_files": true,
+        "run_github_actions": true,
+        "web_search": true,
+        "python_execution": true,
+        "python_runtime_direct_internet": false,
+        "direct_private_meta_share_fetch": false,
+        "arbitrary_browser_automation_of_other_ai_uis": false,
+        "direct_api_access_to_other_ai_platforms": false,
+        "portable_file_interchange": true
+      },
+      "evidence_basis": "Current session tool availability and successful repository operations; Python runtime is isolated from direct internet access. Does not assert all ChatGPT plans or sessions have identical connectors.",
+      "verified_at": "2026-10-21T00:00:00Z",
+      "limitations": [
+        "The GitHub connector is an authenticated integration, not general access to arbitrary private AI conversations.",
+        "No original Meta AI artifact files were attached; their exact schema validation and SHA-256 could not be reproduced here.",
+        "No separate Gemini session or agent was executed in this run."
+      ]
+    }
+  ],
+  "timestamp": "2026-10-21T00:00:00Z"
+}
