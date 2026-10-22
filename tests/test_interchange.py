@@ -42,15 +42,24 @@ class InterchangeTests(unittest.TestCase):
         self.assertEqual("partial", next(t["status"] for t in example["task_status"] if t["task_id"] == "T-004"))
 
     def test_hash_artifacts(self):
-        # Check stable SHA-256 computation over exact repository bytes. The source Meta digest
-        # is not asserted because the original files were not attached to this session.
-        for path in (SCHEMA, INTERCHANGE, REGISTRY, PLAN):
-            raw = path.read_bytes()
-            first = hashlib.sha256(raw).hexdigest()
-            second = hashlib.sha256(path.read_bytes()).hexdigest()
-            self.assertEqual(first, second)
-            self.assertRegex(first, re.compile(r"^[0-9a-f]{64}$"))
-            print(f"SHA256 {path.relative_to(ROOT).as_posix()}={first}")
+        # Verify the manifest against the exact bytes committed in this repository.
+        # The source Meta digest is not asserted because those original files were not attached.
+        example = json.loads(INTERCHANGE.read_text(encoding="utf-8"))
+        expected_paths = {
+            "A-001": SCHEMA,
+            "A-002": PLAN,
+            "A-003": REGISTRY,
+        }
+        manifest = {item["artifact_id"]: item["hash"] for item in example["artifacts"]}
+        for artifact_id, path in expected_paths.items():
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            self.assertEqual(manifest[artifact_id], digest, path.as_posix())
+            self.assertRegex(digest, re.compile(r"^[0-9a-f]{64}$"))
+            print(f"SHA256 {path.relative_to(ROOT).as_posix()}={digest}")
+        for path in (INTERCHANGE,):
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            self.assertRegex(digest, re.compile(r"^[0-9a-f]{64}$"))
+            print(f"SHA256 {path.relative_to(ROOT).as_posix()}={digest} (manifest self-hash intentionally omitted)")
 
 
 if __name__ == "__main__":
