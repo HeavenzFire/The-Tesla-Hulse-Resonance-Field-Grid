@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heavenzfire.dev/schemas/interchange_schema_v0.1.0.json",
+  "title": "HeavenzFire Cross-AI Interchange",
+  "description": "Portable evidence-carrying project handoff. This schema validates interchange structure, not truth of claims.",
+  "type": "object",
+  "required": [
+    "version",
+    "project_id",
+    "source_platform",
+    "conversation_reference",
+    "objective",
+    "decisions",
+    "task_status",
+    "artifacts",
+    "test_results",
+    "next_actions",
+    "permissions",
+    "timestamp"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.1.0"
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_platform": {
+      "type": "string",
+      "minLength": 1
+    },
+    "conversation_reference": {
+      "type": "object",
+      "required": [
+        "share_url",
+        "local_id",
+        "retrievable",
+        "last_verified_message"
+      ],
+      "properties": {
+        "share_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "local_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retrievable": {
+          "type": "boolean"
+        },
+        "last_verified_message": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "statement",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "task_status": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "task_id",
+          "title",
+          "status",
+          "owner"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "owner": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "artifact_id",
+          "type",
+          "path"
+        ],
+        "properties": {
+          "artifact_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "hash": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[0-9a-fA-F]{12,64}$"
+          }
+        }
+      }
+    },
+    "test_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "test_id",
+          "passed"
+        ],
+        "properties": {
+          "test_id": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "output": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "next_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "action",
+          "assignee"
+        ],
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "requires_auth": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "assignee": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "required": [
+        "allow_network",
+        "allow_code_exec",
+        "allow_file_write",
+        "sensitive_actions_require_explicit_auth"
+      ],
+      "properties": {
+        "allow_network": {
+          "type": "boolean"
+        },
+        "allow_code_exec": {
+          "type": "boolean"
+        },
+        "allow_file_write": {
+          "type": "boolean"
+        },
+        "sensitive_actions_require_explicit_auth": {
+          "type": "boolean"
+        }
+      }
+    },
+    "capability_registry": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/capabilityEntry"
+      }
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "capabilityEntry": {
+      "type": "object",
+      "required": [
+        "platform",
+        "capabilities",
+        "evidence_basis"
+      ],
+      "properties": {
+        "platform": {
+          "type": "string"
+        },
+        "capabilities": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        },
+        "evidence_basis": {
+          "type": "string"
+        },
+        "verified_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}
