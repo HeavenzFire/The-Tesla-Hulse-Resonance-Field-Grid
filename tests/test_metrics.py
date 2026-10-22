@@ -88,11 +88,13 @@ class InterventionTests(unittest.TestCase):
 
     def test_exports_required_artifacts_and_provenance(self):
         with tempfile.TemporaryDirectory() as tmp:
-            paths = export_experiment(tmp, seed=5, steps=8)
+            paths = export_experiment(tmp, seed=5, steps=8, code_revision="test-revision-123")
             self.assertTrue(Path(paths["mesh_history"]).exists())
             self.assertTrue(Path(paths["final_states"]).exists())
             payload = json.loads(Path(paths["mesh_history"]).read_text(encoding="utf-8"))
             self.assertEqual(payload["provenance"], "SYNTHETIC_TOY_MODEL_NOT_PHYSICAL_EM_SIMULATION")
+            self.assertEqual(payload["code_revision"], "test-revision-123")
+            self.assertIn("not a measured raw amplitude", payload["metric_contract"]["raw_state_norms"])
             self.assertEqual(set(payload["arms"]), {"baseline", "kick_only", "collision_only", "kick_plus_collision"})
 
 
