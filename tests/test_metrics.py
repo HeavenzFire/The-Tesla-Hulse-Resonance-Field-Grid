@@ -15,12 +15,23 @@ from hf_science.metrics import (
 
 class HopfTests(unittest.TestCase):
     def test_sb0_reported_projection_and_raw_norm_are_separate(self):
-        # Reconstruct a representative state for the rounded SB-0 projection.
-        # Values are deterministic fixture inputs; this is not a claim to reproduce the original probe.
-        state = hopf_state(complex(0.1, 0.2), complex(-0.3, 0.4))
-        self.assertAlmostEqual(state["raw_norm_sq"], 0.30, places=12)
+        # Reconstruct a mathematical fixture from the rounded reported projection
+        # (-0.136, 0.988, -0.074) and raw norm ~0.00104. This is NOT the original
+        # probe state; original raw artifacts are not present in this repository.
+        target = (-0.136, 0.988, -0.074)
+        target_norm = math.sqrt(sum(v * v for v in target))
+        x, y, z = (v / target_norm for v in target)
+        raw_norm = 0.00104
+        theta = math.atan2(y, x)
+        p, q = (1 + z) / 2, (1 - z) / 2
+        z1 = complex(raw_norm * math.sqrt(p), 0.0)
+        z2 = raw_norm * math.sqrt(q) * complex(math.cos(-theta), math.sin(-theta))
+        state = hopf_state(z1, z2)
+        self.assertAlmostEqual(state["raw_norm"], raw_norm, places=12)
+        self.assertAlmostEqual(state["raw_norm_sq"], raw_norm**2, places=15)
+        for actual, expected in zip(state["hopf"], target):
+            self.assertAlmostEqual(actual, expected, delta=0.002)
         self.assertAlmostEqual(math.sqrt(sum(v * v for v in state["hopf"])), 1.0, places=12)
-        self.assertNotAlmostEqual(state["raw_norm"], 1.0, places=6)
         self.assertEqual(state["status"], "ok")
 
     def test_zero_and_near_zero_norm_do_not_divide(self):
