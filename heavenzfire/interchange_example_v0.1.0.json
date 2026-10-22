@@ -52,19 +52,19 @@
       "artifact_id": "A-001",
       "type": "json-schema",
       "path": "heavenzfire/interchange_schema_v0.1.0.json",
-      "hash": null
+      "hash": "e6379f459bf686c80831ddee7f58ffbc9cd44f6dc8f7d58ede4530e8cf2fb1e5"
     },
     {
       "artifact_id": "A-002",
       "type": "adapter-plan",
       "path": "heavenzfire/adapter_plan_v0.1.0.md",
-      "hash": null
+      "hash": "9415cc64d45d064331c94cc9aa3ce040a734213ba4ed762373e2a1cc05d413ee"
     },
     {
       "artifact_id": "A-003",
       "type": "capability-registry",
       "path": "heavenzfire/capability_registry_chatgpt_v0.1.0.json",
-      "hash": null
+      "hash": "346d087cd2fc6705abe59e0d5e6f51f4db54759fc9859efdc8637b97ec3a88e5"
     }
   ],
   "test_results": [],
@@ -116,5 +116,5 @@
       ]
     }
   ],
-  "timestamp": "2026-10-21T00:00:00Z"
+  "timestamp": "2026-10-22T01:25:00Z"
 }
