@@ -34,8 +34,11 @@ acquisition-chain integrity remain unverified until separately evidenced.
 
 ## Acceptance tests
 
+Run the adapter-specific tests without relying on `tests` being an importable
+Python package:
+
 ```powershell
-python -m unittest tests.test_adapters -v
+python -m unittest discover -s tests -p "test_adapters.py" -v
 python -m unittest discover -s tests -v
 ```
 
